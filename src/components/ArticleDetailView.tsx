@@ -14,18 +14,23 @@ import {
   Bookmark, 
   Check, 
   Sparkles,
-  Type
+  Type,
+  Edit3,
+  Palette,
+  X
 } from 'lucide-react';
-import { NewsPost, NewsComment } from '../types/news.ts';
+import { NewsPost, NewsComment, NewsCategory } from '../types/news.ts';
 import { 
   toggleLikePost, 
   checkIfUserLiked, 
   addCommentToPost, 
   subscribeToComments, 
   deleteNewsPost,
-  incrementPostViews
+  incrementPostViews,
+  updateNewsPost
 } from '../services/newsService.ts';
 import { auth, signInWithPopup, googleProvider } from '../firebase/config.ts';
+import ImageStudioModal from './ImageStudioModal.tsx';
 
 interface ArticleDetailViewProps {
   post: NewsPost;
@@ -34,6 +39,7 @@ interface ArticleDetailViewProps {
 }
 
 export default function ArticleDetailView({ post, onBack, onDeleted }: ArticleDetailViewProps) {
+  const [currentPost, setCurrentPost] = useState<NewsPost>(post);
   const [likesCount, setLikesCount] = useState(post.likes);
   const [hasLiked, setHasLiked] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
@@ -45,6 +51,15 @@ export default function ArticleDetailView({ post, onBack, onDeleted }: ArticleDe
   const [copiedLink, setCopiedLink] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [fontSize, setFontSize] = useState<'normal' | 'large' | 'huge'>('normal');
+
+  // Edit post states
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editCategory, setEditCategory] = useState<string>(
+    post.category === 'Sociedade' ? 'Política' : post.category
+  );
+  const [editCoverImage, setEditCoverImage] = useState<string>(post.coverImage);
+  const [isStudioOpen, setIsStudioOpen] = useState(false);
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
 
   // Increment view count on mount
   useEffect(() => {
@@ -168,6 +183,27 @@ export default function ArticleDetailView({ post, onBack, onDeleted }: ArticleDe
     }
   };
 
+  const handleSaveEdit = async () => {
+    setIsSavingEdit(true);
+    try {
+      await updateNewsPost(post.id, {
+        category: editCategory as any,
+        coverImage: editCoverImage
+      });
+      setCurrentPost(prev => ({
+        ...prev,
+        category: editCategory as any,
+        coverImage: editCoverImage
+      }));
+      setIsEditModalOpen(false);
+    } catch (err) {
+      console.error('Update error:', err);
+      alert('Erro ao atualizar notícia. Verifique sua conexão.');
+    } finally {
+      setIsSavingEdit(false);
+    }
+  };
+
   const isAuthor = auth.currentUser && (post as any).authorId === auth.currentUser.uid;
 
   const formattedDate = new Date(post.createdAt).toLocaleDateString('pt-BR', {
@@ -204,6 +240,16 @@ export default function ArticleDetailView({ post, onBack, onDeleted }: ArticleDe
           >
             {isSpeaking ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
             <span className="hidden sm:inline">{isSpeaking ? 'Parar Leitura' : 'Ouvir Notícia'}</span>
+          </button>
+
+          {/* Edit Category or Cover */}
+          <button
+            onClick={() => setIsEditModalOpen(true)}
+            className="p-2.5 rounded-xl border border-stone-200 hover:bg-stone-100 text-stone-700 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+            title="Editar Categoria ou Trocar Capa"
+          >
+            <Edit3 className="w-4 h-4 text-amber-600" />
+            <span className="hidden sm:inline">Editar Matéria / Capa</span>
           </button>
 
           {/* Font Size Toggle */}
@@ -259,20 +305,22 @@ export default function ArticleDetailView({ post, onBack, onDeleted }: ArticleDe
 
       {/* Category Pill and Breaking stamp */}
       <div className="flex flex-wrap items-center gap-2 mb-4">
-        {post.breakingNews && (
+        {currentPost.breakingNews && (
           <span className="px-2.5 py-1 rounded bg-red-600 text-white text-[11px] font-black uppercase tracking-wider animate-pulse">
             URGENTE
           </span>
         )}
-        <span className="px-3 py-1 rounded-full bg-stone-900 text-stone-100 text-xs font-bold uppercase tracking-wider font-mono">
-          {post.category}
-        </span>
+        {currentPost.category && currentPost.category !== 'Sociedade' && (
+          <span className="px-3 py-1 rounded-full bg-stone-900 text-stone-100 text-xs font-bold uppercase tracking-wider font-mono">
+            {currentPost.category}
+          </span>
+        )}
         <span className="text-xs text-stone-500 flex items-center gap-1">
-          <Clock className="w-3.5 h-3.5" /> {post.readTimeMinutes} min de leitura
+          <Clock className="w-3.5 h-3.5" /> {currentPost.readTimeMinutes} min de leitura
         </span>
         <span className="text-xs text-stone-400">&bull;</span>
         <span className="text-xs text-stone-500">
-          {post.views || 1} visualizações na base pública
+          {currentPost.views || 1} visualizações na base pública
         </span>
       </div>
 
@@ -329,8 +377,8 @@ export default function ArticleDetailView({ post, onBack, onDeleted }: ArticleDe
       <figure className="mb-10">
         <div className="relative aspect-[16/9] w-full rounded-2xl overflow-hidden border border-stone-300 shadow-xl bg-stone-900">
           <img
-            src={post.coverImage}
-            alt={post.title}
+            src={currentPost.coverImage}
+            alt={currentPost.title}
             className="w-full h-full object-cover"
           />
         </div>
@@ -505,6 +553,95 @@ export default function ArticleDetailView({ post, onBack, onDeleted }: ArticleDe
           )}
         </div>
       </section>
+
+      {/* Edit Modal to update category or cover image */}
+      {isEditModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/80 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-stone-200 space-y-5">
+            <div className="flex items-center justify-between border-b border-stone-200 pb-3">
+              <h3 className="font-bold text-base text-stone-900 flex items-center gap-2">
+                <Edit3 className="w-4 h-4 text-amber-600" />
+                Editar Categoria e Capa da Notícia
+              </h3>
+              <button
+                onClick={() => setIsEditModalOpen(false)}
+                className="p-1 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Category Selector */}
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-stone-600 mb-1.5">
+                Escolha a Nova Categoria / Tema:
+              </label>
+              <select
+                value={editCategory}
+                onChange={(e) => setEditCategory(e.target.value)}
+                className="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm text-stone-800 font-medium focus:outline-none focus:border-amber-600"
+              >
+                {['Política', 'Esportes', 'Tecnologia', 'Ciência', 'Cultura', 'Economia', 'Mundo', 'Meio Ambiente'].map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Cover Image Preview & Studio Button */}
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-stone-600 mb-1.5">
+                Imagem de Capa Atual:
+              </label>
+              <div className="relative aspect-[16/9] w-full rounded-xl overflow-hidden border border-stone-300 bg-stone-900 mb-3">
+                <img
+                  src={editCoverImage}
+                  alt="Capa"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsStudioOpen(true)}
+                className="w-full py-2.5 px-4 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 font-bold text-xs border border-amber-500/30 flex items-center justify-center gap-2 transition-colors"
+              >
+                <Palette className="w-4 h-4" />
+                Abrir Estúdio para Criar / Trocar Capa (Sem Selo)
+              </button>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-stone-200">
+              <button
+                type="button"
+                onClick={() => setIsEditModalOpen(false)}
+                className="px-4 py-2 rounded-xl text-stone-600 hover:bg-stone-100 text-xs font-semibold"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveEdit}
+                disabled={isSavingEdit}
+                className="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-md transition-all disabled:opacity-50 flex items-center gap-1.5"
+              >
+                <Check className="w-4 h-4" />
+                {isSavingEdit ? 'Salvando...' : 'Salvar Alterações'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Embedded Studio Modal for updating cover image */}
+      <ImageStudioModal
+        isOpen={isStudioOpen}
+        onClose={() => setIsStudioOpen(false)}
+        onSelectImage={(newImgUrl) => {
+          setEditCoverImage(newImgUrl);
+        }}
+        initialHeadline={currentPost.title}
+        initialCategory=""
+      />
 
     </article>
   );

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { 
   Newspaper, 
   PlusCircle, 
-  Search, 
   Flame, 
   Heart, 
   MessageSquare, 
@@ -38,18 +37,6 @@ import {
 } from './firebase/config.ts';
 import CreateNewsModal from './components/CreateNewsModal.tsx';
 import ArticleDetailView from './components/ArticleDetailView.tsx';
-
-const CATEGORIES: NewsCategory[] = [
-  'Todos',
-  'Destaques',
-  'Tecnologia',
-  'Ciência',
-  'Cultura',
-  'Economia',
-  'Mundo',
-  'Meio Ambiente',
-  'Sociedade'
-];
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -260,53 +247,6 @@ export default function App() {
             </div>
           </div>
         )}
-
-        {/* 4. CATEGORY NAVIGATION & SEARCH */}
-        <div className="border-t border-stone-200 bg-stone-50/80 px-4 sm:px-8">
-          <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 py-2.5">
-            
-            {/* Categories */}
-            <nav className="flex items-center gap-1 sm:gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 scrollbar-none">
-              {CATEGORIES.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => {
-                    setSelectedCategory(cat);
-                    setSelectedPost(null);
-                  }}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
-                    selectedCategory === cat && !selectedPost
-                      ? 'bg-stone-900 text-white shadow-xs'
-                      : 'text-stone-600 hover:text-stone-950 hover:bg-stone-200/60'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </nav>
-
-            {/* Search Input */}
-            <div className="relative w-full md:w-72">
-              <Search className="w-4 h-4 text-stone-400 absolute left-3 top-2.5" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Buscar notícias, tags ou autor..."
-                className="w-full bg-white border border-stone-300 rounded-lg pl-9 pr-3 py-1.5 text-xs text-stone-800 placeholder-stone-400 focus:outline-none focus:border-amber-600 shadow-2xs"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-2.5 top-2 text-stone-400 hover:text-stone-600 text-xs font-bold"
-                >
-                  &times;
-                </button>
-              )}
-            </div>
-
-          </div>
-        </div>
       </header>
 
       {/* 5. MAIN CONTENT */}
@@ -419,9 +359,11 @@ export default function App() {
                           URGENTE
                         </span>
                       )}
-                      <span className="px-3 py-1 rounded-md bg-stone-900/90 backdrop-blur-md text-amber-400 text-xs font-bold uppercase tracking-wider shadow-md">
-                        {leadPost.category}
-                      </span>
+                      {leadPost.category && leadPost.category !== 'Sociedade' && (
+                        <span className="px-3 py-1 rounded-md bg-stone-900/90 backdrop-blur-md text-amber-400 text-xs font-bold uppercase tracking-wider shadow-md">
+                          {leadPost.category}
+                        </span>
+                      )}
                     </div>
                   </div>
 
@@ -506,9 +448,11 @@ export default function App() {
                             URGENTE
                           </span>
                         )}
-                        <span className="px-2 py-0.5 rounded bg-stone-900/80 backdrop-blur-xs text-stone-200 text-[10px] font-bold uppercase tracking-wider">
-                          {post.category}
-                        </span>
+                        {post.category && post.category !== 'Sociedade' && (
+                          <span className="px-2 py-0.5 rounded bg-stone-900/80 backdrop-blur-xs text-stone-200 text-[10px] font-bold uppercase tracking-wider">
+                            {post.category}
+                          </span>
+                        )}
                       </div>
                     </div>
 

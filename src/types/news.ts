@@ -1,10 +1,12 @@
 export type NewsCategory = 
   | 'Todos'
   | 'Destaques'
+  | 'Política'
+  | 'Economia'
   | 'Tecnologia'
   | 'Ciência'
   | 'Cultura'
-  | 'Economia'
+  | 'Esportes'
   | 'Mundo'
   | 'Meio Ambiente'
   | 'Sociedade';

@@ -22,29 +22,11 @@ export { testFirestoreConnection };
 const POSTS_PATH = 'posts';
 
 /**
- * Bootstrap initial public news if collection is empty
+ * Bootstrap initial public news if collection is empty (disabled to preserve only user-posted news)
  */
 export async function seedInitialPostsIfEmpty(): Promise<void> {
-  try {
-    const snap = await getDocs(query(collection(db, POSTS_PATH), limit(1)));
-    if (!snap.empty) {
-      return;
-    }
-
-    // Seed batch
-    const batch = writeBatch(db);
-    for (const post of INITIAL_POSTS) {
-      const docRef = doc(db, POSTS_PATH, post.id);
-      batch.set(docRef, {
-        ...post,
-        authorId: 'system_curator',
-        updatedAt: post.createdAt,
-      });
-    }
-    await batch.commit();
-  } catch (error) {
-    console.warn('Initial seeding note:', error);
-  }
+  // Respect user preference: keep only genuinely posted articles
+  return;
 }
 
 /**
@@ -66,7 +48,7 @@ export function subscribeToPosts(
             title: data.title || '',
             subtitle: data.subtitle || '',
             content: data.content || '',
-            category: data.category || 'Sociedade',
+            category: data.category || 'Geral',
             coverImage: data.coverImage || '',
             coverCaption: data.coverCaption || '',
             authorName: data.authorName || 'Redator Anônimo',
@@ -297,5 +279,21 @@ export async function deleteNewsPost(postId: string): Promise<void> {
     await deleteDoc(doc(db, POSTS_PATH, postId));
   } catch (error) {
     handleFirestoreError(error, OperationType.DELETE, path);
+  }
+}
+
+/**
+ * Update an existing news post (category, coverImage, title, etc.)
+ */
+export async function updateNewsPost(
+  postId: string, 
+  updates: Partial<NewsPost>
+): Promise<void> {
+  const path = `${POSTS_PATH}/${postId}`;
+  try {
+    const postRef = doc(db, POSTS_PATH, postId);
+    await updateDoc(postRef, updates);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, path);
   }
 }

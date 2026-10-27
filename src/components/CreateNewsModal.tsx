@@ -27,10 +27,12 @@ interface CreateNewsModalProps {
 }
 
 const CATEGORIES: Exclude<NewsCategory, 'Todos' | 'Destaques'>[] = [
+  'Política',
+  'Economia',
   'Tecnologia',
   'Ciência',
   'Cultura',
-  'Economia',
+  'Esportes',
   'Mundo',
   'Meio Ambiente',
   'Sociedade'

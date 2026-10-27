@@ -70,6 +70,16 @@ const CURATED_NEWS_PHOTOS = [
     caption: 'Foto ilustrativa: Parques eólicos e matriz energética renovável.'
   },
   {
+    title: 'Política & Diplomacia',
+    url: 'https://images.unsplash.com/photo-1541872703-74c5e44368f9?q=80&w=1200&auto=format&fit=crop',
+    caption: 'Foto ilustrativa: Debates parlamentares, plenário e decisões de Estado.'
+  },
+  {
+    title: 'Esportes & Competições',
+    url: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?q=80&w=1200&auto=format&fit=crop',
+    caption: 'Foto ilustrativa: Atletismo, estádios e campeonatos esportivos.'
+  },
+  {
     title: 'Manifestação & Sociedade Civil',
     url: 'https://images.unsplash.com/photo-1531206715517-5c0ba140b2b8?q=80&w=1200&auto=format&fit=crop',
     caption: 'Foto ilustrativa: Engajamento cívico e vida comunitária.'
@@ -81,13 +91,13 @@ export default function ImageStudioModal({
   onClose,
   onSelectImage,
   initialHeadline = '',
-  initialCategory = 'Destaque'
+  initialCategory = ''
 }: ImageStudioModalProps) {
   const [activeTab, setActiveTab] = useState<'canvas' | 'ai' | 'upload' | 'curated'>('canvas');
   
   // Canvas Studio State
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [badgeText, setBadgeText] = useState<string>(initialCategory.toUpperCase());
+  const [badgeText, setBadgeText] = useState<string>('');
   const [headlineText, setHeadlineText] = useState<string>(initialHeadline || 'MANCHETE DA REPORTAGEM');
   const [subText, setSubText] = useState<string>('Jornalismo Aberto &bull; Edição Pública');
   const [selectedGradient, setSelectedGradient] = useState(PRESET_GRADIENTS[0]);
@@ -111,8 +121,16 @@ export default function ImageStudioModal({
       setHeadlineText(initialHeadline.toUpperCase());
       setAiPrompt(initialHeadline);
     }
-    if (initialCategory) {
+    // Never force 'SOCIEDADE' or 'DESTAQUE' as badge on the cover image!
+    if (
+      initialCategory && 
+      initialCategory.toLowerCase() !== 'sociedade' && 
+      initialCategory.toLowerCase() !== 'destaque' &&
+      initialCategory.toLowerCase() !== 'todos'
+    ) {
       setBadgeText(initialCategory.toUpperCase());
+    } else {
+      setBadgeText('');
     }
   }, [initialHeadline, initialCategory]);
 
@@ -186,21 +204,22 @@ export default function ImageStudioModal({
     ctx.fillRect(0, 0, width, height);
 
     // 4. Render Layout
+    const cleanBadge = badgeText.trim().replace(/^sociedade$/i, '');
     if (layoutStyle === 'editorial' || layoutStyle === 'badge-top') {
       // Top bar
       const topY = 48;
       
-      // Badge pill
-      if (badgeText.trim()) {
+      // Badge pill (only if non-empty and not Sociedade)
+      if (cleanBadge) {
         ctx.fillStyle = selectedGradient.accent;
-        const badgeW = Math.min(240, ctx.measureText(badgeText).width + 36);
+        const badgeW = Math.min(240, ctx.measureText(cleanBadge).width + 36);
         ctx.beginPath();
         ctx.roundRect(40, topY - 14, Math.max(100, badgeW), 28, 6);
         ctx.fill();
 
         ctx.fillStyle = '#0f172a';
         ctx.font = 'bold 12px "Plus Jakarta Sans", sans-serif';
-        ctx.fillText(badgeText.toUpperCase(), 52, topY + 4);
+        ctx.fillText(cleanBadge.toUpperCase(), 52, topY + 4);
       }
 
       // Source mark
@@ -500,17 +519,44 @@ export default function ImageStudioModal({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-stone-400 mb-1">
-                    Etiqueta / Selo (Badge)
-                  </label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-stone-400">
+                      Etiqueta / Selo (Badge)
+                    </label>
+                    {badgeText && (
+                      <button
+                        type="button"
+                        onClick={() => setBadgeText('')}
+                        className="text-[11px] text-amber-400 hover:text-amber-300 font-semibold"
+                      >
+                        Limpar / Deixar Sem Selo
+                      </button>
+                    )}
+                  </div>
                   <div className="flex gap-2">
                     <input
                       type="text"
                       value={badgeText}
                       onChange={(e) => setBadgeText(e.target.value)}
-                      placeholder="EX: URGENTE, CIÊNCIA, EXCLUSIVO"
-                      className="w-full bg-stone-800 border border-stone-700 rounded-lg px-3 py-2 text-stone-100 placeholder-stone-500 focus:outline-none focus:border-amber-500"
+                      placeholder="Deixe vazio para não exibir nenhum selo"
+                      className="w-full bg-stone-800 border border-stone-700 rounded-lg px-3 py-2 text-stone-100 placeholder-stone-500 focus:outline-none focus:border-amber-500 text-xs"
                     />
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {['Sem Selo', 'URGENTE', 'POLÍTICA', 'ESPORTES', 'EXCLUSIVO'].map((tag) => (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => setBadgeText(tag === 'Sem Selo' ? '' : tag)}
+                        className={`text-[10px] px-2 py-0.5 rounded border transition-colors ${
+                          (tag === 'Sem Selo' && !badgeText) || badgeText === tag
+                            ? 'bg-amber-500 text-stone-950 border-amber-500 font-bold'
+                            : 'bg-stone-800 text-stone-300 border-stone-700 hover:bg-stone-700'
+                        }`}
+                      >
+                        {tag}
+                      </button>
+                    ))}
                   </div>
                 </div>
 

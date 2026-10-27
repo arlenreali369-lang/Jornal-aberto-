@@ -1,155 +1,214 @@
 import { NewsPost } from '../types/news.ts';
 
 export const INITIAL_POSTS: NewsPost[] = [
+  // --- POLÍTICA (ESPÍRITO SANTO & BRASIL) ---
   {
-    id: 'noticia-1',
-    title: 'Nova Geração de Telescópios Espaciais Revela Atmosfera de Exoplaneta Rochoso',
-    subtitle: 'Observações de alta sensibilidade detectaram compostos de carbono e vapor em planeta situado a 48 anos-luz da Terra.',
-    category: 'Ciência',
-    coverImage: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200&auto=format&fit=crop',
-    coverCaption: 'Representação artística do exoplaneta orbitando sua estrela hospedeira em zona potencialmente habitável.',
-    authorName: 'Dra. Helena Martins',
-    authorHandle: '@helena.astro',
-    authorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop',
-    tags: ['Astronomia', 'Exoplanetas', 'Descoberta', 'Espaço'],
-    likes: 142,
-    views: 1890,
+    id: 'politica-es-fundo-soberano',
+    title: 'Governo do ES e Ales Destinam Recursos Recordes de Royalties para Obras Municipais e Saneamento',
+    subtitle: 'Acordo entre Executivo e Legislativo direciona receitas do Fundo Soberano para macrodrenagem, contenção de encostas e expansão de escolas de tempo integral.',
+    category: 'Política',
+    coverImage: 'https://images.unsplash.com/photo-1541872703-74c5e44368f9?q=80&w=1200&auto=format&fit=crop',
+    coverCaption: 'Plenário da Assembleia Legislativa do Espírito Santo (Ales) e Palácio Anchieta em Vitória.',
+    authorName: 'André Bastos (Correspondente ES)',
+    authorHandle: '@andre.politica',
+    authorAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop',
+    tags: ['Política', 'Espírito Santo', 'Ales', 'Vitória', 'Infraestrutura'],
+    likes: 194,
+    views: 2680,
     featured: true,
     breakingNews: true,
-    createdAt: new Date(Date.now() - 1000 * 60 * 120).toISOString(), // 2 hours ago
+    createdAt: new Date(Date.now() - 1000 * 60 * 45).toISOString(), // 45 min ago
     readTimeMinutes: 4,
     comments: [
       {
-        id: 'c1',
-        authorName: 'Carlos Eduardo',
-        authorAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop',
-        content: 'Um salto astronômico incrível! A espectroscopia tem avançado muito mais rápido do que esperávamos.',
-        createdAt: new Date(Date.now() - 1000 * 60 * 75).toISOString(),
-      },
-      {
-        id: 'c2',
-        authorName: 'Beatriz Lima',
-        authorAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop',
-        content: 'Parabéns pela cobertura clara e objetiva do artigo. Muito empolgante!',
-        createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+        id: 'c-pol-1',
+        authorName: 'Juliana Vieira',
+        content: 'O Fundo Soberano do ES é uma referência de planejamento intergeracional para o restante do país.',
+        createdAt: new Date(Date.now() - 1000 * 60 * 20).toISOString(),
       }
     ],
-    content: `Uma equipe internacional de astrofísicos anunciou nesta manhã a detecção confirmada de assinaturas atmosféricas complexas no exoplaneta designado LHS-475b. Utilizando novos métodos de refinamento espectral, os instrumentos registraram variações luminosas que indicam a presença de dióxido de carbono e traços consistentes de vapor d'água.
-
-### Um passo decisivo para a astrobiologia
-
-Até recentemente, analisar atmosferas de planetas rochosos com dimensões semelhantes às da Terra constituía um dos maiores gargalos tecnológicos da ciência espacial. Enquanto gigantes gasosos produzem sinais fáceis de calibrar, mundos com crosta sólida exigem medições de precisão nanométrica durante o trânsito planetário.
-
-"O que estamos observando não é apenas um gráfico de absorção estelar; é a evidência palpável de que exoplanetas rochosos conseguem reter atmosferas secundárias mesmo diante da atividade de sua estrela mãe", declarou o líder da pesquisa em coletiva.
-
-### Próximos desdobramentos
-
-As próximas campanhas de observação, agendadas para o segundo semestre, se concentrarão em mapear a distribuição térmica entre o lado diurno e noturno do planeta. Esses dados permitirão aos climatologistas planetários simular correntes de ar e estimar a pressão na superfície com margem de erro inferior a 5%.`
+    content: `Em uma sessão extraordinária no Palácio Domingos Martins, a Assembleia Legislativa do Estado do Espírito Santo (Ales) e o Governo Estadual chancelaram a nova destinação orçamentária dos rendimentos do Fundo Soberano para o biênio.\n\n### Investimentos Prioritários na Grande Vitória e no Interior\n\nO plano contempla obras de saneamento básico e prevenção de cheias nas bacias hidrográficas dos rios Santa Maria da Vitória e Jucu, beneficiando diretamente os municípios de Vitória, Vila Velha, Serra e Cariacica.\n\n"Nosso compromisso é transformar a riqueza finita do petróleo em ativos permanentes de educação, infraestrutura e sustentabilidade que fiquem de legado para as próximas gerações de capixabas", enfatizou a liderança do governo estadual.\n\n### Transparência e Acompanhamento Cívico\n\nTodos os editais licitatórios contarão com monitoramento conjunto do Tribunal de Contas do Estado (TCE-ES) e painéis públicos de dados abertos para prestação de contas aos cidadãos.`
   },
   {
-    id: 'noticia-2',
-    title: 'Cidades Sustentáveis: Como Corredores Verdes Reduzem em até 4°C o Calor Urbano',
-    subtitle: 'Estudo em 12 capitais demonstra que a integração de flora nativa em avenidas e coberturas atenua significativamente as ilhas de calor.',
-    category: 'Meio Ambiente',
-    coverImage: 'https://images.unsplash.com/photo-1518005020951-eccb494ad742?q=80&w=1200&auto=format&fit=crop',
-    coverCaption: 'Exemplo de avenida arborizada com jardins de chuva e ciclovia integrada em projeto de requalificação urbana.',
-    authorName: 'Thiago Valverde',
-    authorHandle: '@t.valverde',
-    authorAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop',
-    tags: ['Urbanismo', 'Sustentabilidade', 'Clima', 'Cidades'],
-    likes: 98,
-    views: 1240,
+    id: 'politica-br-reforma-fiscal',
+    title: 'Congresso e Executivo Consolidam Acordo para Acelerar Votação da Lei de Diretrizes Orçamentárias',
+    subtitle: 'Comissões mistas em Brasília alinham investimentos em transportes, transição energética e piso constitucional da saúde.',
+    category: 'Política',
+    coverImage: 'https://images.unsplash.com/photo-1577495508048-b635879837f1?q=80&w=1200&auto=format&fit=crop',
+    coverCaption: 'Cúpulas do Congresso Nacional durante deliberação orçamentária em Brasília.',
+    authorName: 'Patrícia Prado (Brasília)',
+    authorHandle: '@patricia.politica',
+    authorAvatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=200&auto=format&fit=crop',
+    tags: ['Política', 'Brasil', 'Congresso', 'Brasília', 'Orçamento'],
+    likes: 148,
+    views: 2130,
     featured: false,
     breakingNews: false,
-    createdAt: new Date(Date.now() - 1000 * 60 * 360).toISOString(),
-    readTimeMinutes: 3,
-    comments: [
-      {
-        id: 'c3',
-        authorName: 'Mariana Rocha',
-        authorAvatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=200&auto=format&fit=crop',
-        content: 'Minha rua ganhou árvores recentemente e a diferença de sensação térmica é imediata!',
-        createdAt: new Date(Date.now() - 1000 * 60 * 180).toISOString(),
-      }
-    ],
-    content: `O avanço do asfalto e das superfícies impermeabilizadas nos grandes centros urbanos intensificou o fenômeno das ilhas de calor, onde a temperatura em áreas densas pode superar em até 6°C a de bairros periféricos arborizados.
-
-Uma pesquisa abrangente divulgada pelo Instituto de Climatologia Urbana revelou que intervenções pontuais, mas conectadas — os chamados "corredores ecológicos" —, conseguiram reduzir em média 3,8°C a temperatura ambiente ao nível dos pedestres.
-
-### Além da sombra: a evapotranspiração
-
-Diferente de estruturas artificiais de sombreamento, as árvores nativas realizam evapotranspiração contínua, bombeando umidade para a camada inferior da atmosfera. Além disso, a substituição de canteiros de concreto por jardins de chuva melhora a drenagem pluvial, reduzindo riscos de alagamentos durante tempestades de verão.`
+    createdAt: new Date(Date.now() - 1000 * 60 * 110).toISOString(),
+    readTimeMinutes: 4,
+    comments: [],
+    content: `Representantes das principais bancadas do Congresso Nacional concluíram a rodada de consultas que estabelece as metas fiscais e o cronograma prioritário de votações.\n\nO texto aprovado garante a preservação dos aportes federais em rodovias interestaduais e na modernização do sistema de inteligência da segurança pública, além de regras claras para o controle de renúncias fiscais setoriais.`
   },
+
+  // --- TECNOLOGIA (ESPÍRITO SANTO & BRASIL) ---
   {
-    id: 'noticia-3',
-    title: 'Modelos Abertos de Inteligência Artificial Redefinem o Desenvolvimento de Software',
-    subtitle: 'Comunidades globais aceleram adoção de agentes locais que funcionam diretamente em hardware pessoal sem envio de dados a servidores externos.',
+    id: 'tecnologia-es-hub-inovacao',
+    title: 'Polo Tecnológico do ES: Vitória e Vila Velha Atraem Novas Startups com Hubs de Inteligência Artificial e Logística',
+    subtitle: 'Ecossistema capixaba, impulsionado pelo Base27 e FindesLab, registra alta de 34% em investimentos privados para soluções portuárias e agtechs.',
     category: 'Tecnologia',
     coverImage: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200&auto=format&fit=crop',
-    coverCaption: 'Visualização de circuitos neurais e processamento de dados em nós de computação distribuída.',
-    authorName: 'Renata Albuquerque',
+    coverCaption: 'Ambiente de inovação e pesquisa aplicada no polo tecnológico da Grande Vitória.',
+    authorName: 'Renata Albuquerque (Tecnologia)',
     authorHandle: '@renata.tech',
     authorAvatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop',
-    tags: ['IA', 'OpenSource', 'Programação', 'Futuro'],
+    tags: ['Tecnologia', 'Espírito Santo', 'Inovação', 'Startups', 'Vitória'],
+    likes: 226,
+    views: 3410,
+    featured: true,
+    breakingNews: false,
+    createdAt: new Date(Date.now() - 1000 * 60 * 90).toISOString(),
+    readTimeMinutes: 4,
+    comments: [
+      {
+        id: 'c-tech-1',
+        authorName: 'Marcos Caldeira',
+        content: 'O Espírito Santo está se consolidando como um dos pólos de logística tech mais fortes da América Latina.',
+        createdAt: new Date(Date.now() - 1000 * 60 * 35).toISOString(),
+      }
+    ],
+    content: `O ecossistema capixaba de inovação alcançou marcas expressivas no último trimestre. Com a expansão de programas de aceleração sediados na orla de Vitória e nos centros empresariais de Vila Velha e Serra, empreendedores locais têm desenvolvido sistemas baseados em inteligência artificial preditiva voltados a operações portuárias de alta tonelagem e rastreamento de safras de café.\n\n### Integração com Grandes Indústrias\n\nGrandes players instalados no Espírito Santo estão contratando soluções diretamente de startups formadas por pesquisadores da Ufes e do Ifes, encurtando o tempo entre o protótipo acadêmico e a implementação nas cadeias globais de suprimentos.`
+  },
+  {
+    id: 'tecnologia-br-chips-ia',
+    title: 'Brasil Fortalece Indústria de Semicondutores e Inaugura Novo Centro de Computação Quântica e IA',
+    subtitle: 'Laboratórios nacionais recebem investimentos para desenvolver processadores especializados em eficiência energética e modelos abertos.',
+    category: 'Tecnologia',
+    coverImage: 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1200&auto=format&fit=crop',
+    coverCaption: 'Placas de circuito e semicondutores de alto desempenho em laboratório nacional.',
+    authorName: 'Felipe Santana',
+    authorHandle: '@felipe.hardware',
+    authorAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop',
+    tags: ['Tecnologia', 'Brasil', 'Semicondutores', 'IA', 'Computação'],
+    likes: 182,
+    views: 2890,
+    featured: false,
+    breakingNews: false,
+    createdAt: new Date(Date.now() - 1000 * 60 * 160).toISOString(),
+    readTimeMinutes: 3,
+    comments: [],
+    content: `O Ministério da Ciência, Tecnologia e Inovação confirmou a ativação de uma nova linha piloto para prototipagem de semicondutores avançados.\n\nA iniciativa visa preparar o país para a crescente demanda por processamento de inteligência artificial de borda, capacitando centenas de pós-graduandos em microeletrônica e sistemas ciberfísicos.`
+  },
+
+  // --- ECONOMIA (ESPÍRITO SANTO & BRASIL) ---
+  {
+    id: 'economia-es-portos-exportacao',
+    title: 'Portos do Espírito Santo Registram Movimentação Histórica e Lideram Exportações de Café Conilon e Rochas Ornamentais',
+    subtitle: 'Complexos portuários de Tubarão, Capuaba e Portocel movimentam bilhões e consolidam liderança capixaba em comércio exterior.',
+    category: 'Economia',
+    coverImage: 'https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?q=80&w=1200&auto=format&fit=crop',
+    coverCaption: 'Terminal de granéis e navios cargueiros no complexo portuário do Espírito Santo.',
+    authorName: 'Patrícia Prado (Economia)',
+    authorHandle: '@patricia.economia',
+    authorAvatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=200&auto=format&fit=crop',
+    tags: ['Economia', 'Espírito Santo', 'Portos', 'Exportação', 'CaféConilon'],
     likes: 215,
     views: 3120,
     featured: true,
     breakingNews: false,
-    createdAt: new Date(Date.now() - 1000 * 60 * 520).toISOString(),
-    readTimeMinutes: 5,
+    createdAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
+    readTimeMinutes: 4,
     comments: [
       {
-        id: 'c4',
-        authorName: 'Lucas Ferraz',
-        authorAvatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=200&auto=format&fit=crop',
-        content: 'Rodar modelos diretamente no chip M3/M4 ou em placas RTX com total privacidade é o caminho sem volta.',
-        createdAt: new Date(Date.now() - 1000 * 60 * 200).toISOString(),
+        id: 'c-eco-1',
+        authorName: 'Eduardo Guimarães',
+        content: 'O agronegócio de café do ES unido à logística portuária eficiente é o motor do nosso crescimento econômico.',
+        createdAt: new Date(Date.now() - 1000 * 60 * 25).toISOString(),
       }
     ],
-    content: `O ecossistema de desenvolvimento assistido por inteligência artificial passa por uma transformação silenciosa, porém profunda: a migração de chamadas de API centralizadas para modelos compactos e altamente otimizados executados localmente.
-
-### Eficiência e soberania de código
-
-Empresas que lidam com propriedade intelectual sensível e conformidade com leis de proteção de dados relutavam em alimentar sistemas de terceiros com suas bases de código. Com os novos pesos abertos quantizados em 4 bits, programadores conseguem autocompletar e debugar lógicas complexas com latência quase nula e custo operacional previsível.`
+    content: `Os portos instalados no litoral capixaba atingiram novo ápice operacional nos primeiros meses do ano. Dados da Secretaria de Comércio Exterior apontam que o Espírito Santo registrou alta nas remessas de blocos e chapas polidas de rochas ornamentais para a Europa e Estados Unidos, ao passo que os embarques de café conilon atingiram cotas sem precedentes nos terminais de Vitória.\n\n### Eficiência Logística e Atração de Cargas\n\nA desburocratização de desembaraço aduaneiro e os incentivos fiscais competitivos colocam o Espírito Santo como o corredor logístico preferencial de mercadorias de alto valor agregado no Centro-Leste brasileiro.`
   },
   {
-    id: 'noticia-4',
-    title: 'Bienal Internacional de Artes Celebra Encontro entre Gravura Tradicional e Arte Computacional',
-    subtitle: 'Exposição reúne mais de 150 obras em diálogo entre xilogravuras clássicas e instalações interativas geradas por algoritmos generativos.',
-    category: 'Cultura',
-    coverImage: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?q=80&w=1200&auto=format&fit=crop',
-    coverCaption: 'Visitantes interagem com projeção imersiva de pigmentos dinâmicos em galeria central.',
-    authorName: 'Mateus Siqueira',
-    authorHandle: '@mateus.arte',
-    authorAvatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=200&auto=format&fit=crop',
-    tags: ['Arte', 'Exposição', 'Cultura', 'Design'],
-    likes: 76,
-    views: 890,
-    featured: false,
-    breakingNews: false,
-    createdAt: new Date(Date.now() - 1000 * 60 * 800).toISOString(),
-    readTimeMinutes: 3,
-    comments: [],
-    content: `A interseção entre o toque manual da matriz entalhada na madeira e a frieza matemática do código fonte é o tema central da nova edição da Bienal. Curadores destacam que a tecnologia não substitui a sensibilidade artística, mas atua como um amplificador de possibilidades expressivas.`
-  },
-  {
-    id: 'noticia-5',
-    title: 'Transição Energética: Investimentos em Fontes Renováveis Superam Combustíveis Fósseis pelo 3º Ano',
-    subtitle: 'Energia solar distribuída e baterias de escala utilitária impulsionam nova marca econômica no setor produtivo.',
+    id: 'economia-br-balanca-comercial',
+    title: 'Balança Comercial Brasileira Supera Expectativas com Superávit Histórico e Controle Inflacionário',
+    subtitle: 'Safra recorde de grãos, expansão do setor de serviços e estabilidade cambial impulsionam confiança dos investidores internacionais.',
     category: 'Economia',
-    coverImage: 'https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?q=80&w=1200&auto=format&fit=crop',
-    coverCaption: 'Parque fotovoltaico integrado a pastagens em modelo de agrivoltaísmo no interior do país.',
-    authorName: 'Patrícia Prado',
-    authorHandle: '@patricia.economia',
-    authorAvatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=200&auto=format&fit=crop',
-    tags: ['Economia', 'EnergiaSolar', 'Mercado', 'Finanças'],
-    likes: 112,
-    views: 1430,
+    coverImage: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?q=80&w=1200&auto=format&fit=crop',
+    coverCaption: 'Mercado financeiro e indicadores econômicos em alta nos centros financeiros do Brasil.',
+    authorName: 'Lucas Ferraz',
+    authorHandle: '@lucas.mercado',
+    authorAvatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=200&auto=format&fit=crop',
+    tags: ['Economia', 'Brasil', 'ComércioExterior', 'Mercado', 'Finanças'],
+    likes: 167,
+    views: 2340,
     featured: false,
     breakingNews: false,
-    createdAt: new Date(Date.now() - 1000 * 60 * 1100).toISOString(),
+    createdAt: new Date(Date.now() - 1000 * 60 * 140).toISOString(),
     readTimeMinutes: 4,
     comments: [],
-    content: `Os investimentos globais em tecnologias de descarbonização e infraestrutura limpa atingiram a marca de 1,8 trilhão de dólares nos últimos doze meses. O relatório aponta que a paridade de rede alcançada por módulos fotovoltaicos de silício e o barateamento de acumuladores de lítio tornaram a opção sustentável economicamente mais competitiva em mais de 80% das praças avaliadas.`
+    content: `O saldo da balança comercial brasileira acumulou novo recorde de superávit no fechamento do período. Com forte demanda internacional por commodities agrícolas e minerais e desaceleração do custo de insumos importados, analistas econômicos revisaram para cima as projeções de crescimento do PIB nacional para o ano.`
+  },
+
+  // --- ESPORTES (ESPÍRITO SANTO & BRASIL) ---
+  {
+    id: 'esportes-es-capixabao-vi-rio',
+    title: 'Clássico Vi-Rio e Copa Espírito Santo Mobilizam Estádios Kleber Andrade e Salvador Costa',
+    subtitle: 'Rio Branco, Desportiva, Vitória-ES e Porto Vitória protagonizam fase decisiva do futebol capixaba com ingressos esgotados.',
+    category: 'Esportes',
+    coverImage: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?q=80&w=1200&auto=format&fit=crop',
+    coverCaption: 'Torcida comparece em peso ao Estádio Estadual Kleber Andrade em Cariacica.',
+    authorName: 'Camila Nogueira (Esportes)',
+    authorHandle: '@camila.esportes',
+    authorAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop',
+    tags: ['Esportes', 'Espírito Santo', 'Capixabão', 'Futebol', 'Cariacica'],
+    likes: 178,
+    views: 2490,
+    featured: false,
+    breakingNews: false,
+    createdAt: new Date(Date.now() - 1000 * 60 * 80).toISOString(),
+    readTimeMinutes: 3,
+    comments: [],
+    content: `A atmosfera em torno do futebol capixaba voltou a ganhar contornos de celebração popular. O confronto decisivo no Kleber Andrade reuniu famílias e torcedores organizados que vibraram com uma partida decidida nos minutos de acréscimo.`
+  },
+  {
+    id: 'esportes-br-brasileirao-rodada',
+    title: 'Brasileirão e Copa do Brasil: Rodada Decisiva Define Liderança e Classificados Continentais',
+    subtitle: 'Confrontos nos principais palcos do país mantêm emoção até os minutos finais da rodada.',
+    category: 'Esportes',
+    coverImage: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=1200&auto=format&fit=crop',
+    coverCaption: 'Grandes partidas agitam arenas esportivas em todo o Brasil.',
+    authorName: 'Mateus Siqueira',
+    authorHandle: '@mateus.esportes',
+    authorAvatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=200&auto=format&fit=crop',
+    tags: ['Esportes', 'Brasil', 'Brasileirão', 'Futebol', 'Competição'],
+    likes: 190,
+    views: 2870,
+    featured: false,
+    breakingNews: false,
+    createdAt: new Date(Date.now() - 1000 * 60 * 125).toISOString(),
+    readTimeMinutes: 3,
+    comments: [],
+    content: `A rodada deste fim de semana no Campeonato Brasileiro foi marcada por viradas eletrizantes e grande equilíbrio técnico nos jogos de topo e fuga da zona de rebaixamento.`
+  },
+
+  // --- CIÊNCIA & MEIO AMBIENTE ---
+  {
+    id: 'ciencia-exoplaneta',
+    title: 'Nova Geração de Telescópios Revela Atmosfera Complexa em Exoplaneta Rochoso',
+    subtitle: 'Instrumentos espaciais detectam vapor e moléculas orgânicas em planeta a 48 anos-luz da Terra.',
+    category: 'Ciência',
+    coverImage: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200&auto=format&fit=crop',
+    coverCaption: 'Representação artística do exoplaneta em zona habitável.',
+    authorName: 'Dra. Helena Martins',
+    authorHandle: '@helena.astro',
+    authorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop',
+    tags: ['Ciência', 'Astronomia', 'Espaço', 'Descoberta'],
+    likes: 142,
+    views: 1890,
+    featured: false,
+    breakingNews: false,
+    createdAt: new Date(Date.now() - 1000 * 60 * 200).toISOString(),
+    readTimeMinutes: 4,
+    comments: [],
+    content: `Uma equipe internacional de astrofísicos anunciou a detecção confirmada de assinaturas atmosféricas complexas em planeta rochoso similar à Terra.`
   }
 ];
