@@ -11,6 +11,23 @@ export function getArticleUrl(postId: string): string {
 }
 
 /**
+ * Returns the exact public image URL for a post
+ * Converts base64/data URIs to the server endpoint so WhatsApp crawler can load it
+ */
+export function getArticleImageUrl(post: NewsPost): string {
+  if (!post.coverImage) {
+    return 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?q=80&w=1200&auto=format&fit=crop';
+  }
+  if (post.coverImage.startsWith('http://') || post.coverImage.startsWith('https://')) {
+    return post.coverImage;
+  }
+  if (typeof window !== 'undefined') {
+    return `${window.location.origin}/api/materia-image/${encodeURIComponent(post.id)}`;
+  }
+  return post.coverImage;
+}
+
+/**
  * Generates the formatted WhatsApp message text
  * Contains:
  * - Bold headline (Enunciado da matéria)
@@ -20,6 +37,7 @@ export function getArticleUrl(postId: string): string {
  */
 export function formatWhatsAppMessage(post: NewsPost): string {
   const articleUrl = getArticleUrl(post.id);
+  const imageUrl = getArticleImageUrl(post);
   const headline = post.title.trim();
   const subtitle = post.subtitle?.trim();
   const categoryTag = post.category && post.category !== 'Sociedade' ? `[${post.category.toUpperCase()}] ` : '';
@@ -35,15 +53,16 @@ export function formatWhatsAppMessage(post: NewsPost): string {
   }
 
   // Imagem da matéria (link direto da foto da capa)
-  if (post.coverImage && (post.coverImage.startsWith('http://') || post.coverImage.startsWith('https://'))) {
-    parts.push(`📸 *Imagem da matéria:* \n${post.coverImage}`);
+  if (imageUrl) {
+    parts.push(`📸 *Foto da matéria:*\n${imageUrl}`);
   }
 
   // Link para a matéria completa
-  parts.push(`👉 *Leia a reportagem completa e interaja no Jornal Aberto:*\n${articleUrl}`);
+  parts.push(`👉 *Leia a reportagem completa no Jornal Aberto:*\n${articleUrl}`);
 
   return parts.join('\n\n');
 }
+
 
 /**
  * Creates the WhatsApp URL for direct click-to-chat
@@ -130,8 +149,9 @@ export function updateArticleOpenGraphMeta(post: NewsPost | null): void {
 
   const title = post ? `${post.title} | Jornal Aberto` : defaultTitle;
   const desc = post ? (post.subtitle || post.content.substring(0, 160)) : defaultDesc;
-  const image = post?.coverImage || defaultImage;
+  const image = post ? getArticleImageUrl(post) : defaultImage;
   const url = post ? getArticleUrl(post.id) : defaultUrl;
+
 
   document.title = title;
 

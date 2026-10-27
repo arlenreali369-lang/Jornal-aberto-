@@ -15,9 +15,11 @@ import {
   openWhatsAppShare, 
   formatWhatsAppMessage, 
   getArticleUrl, 
+  getArticleImageUrl,
   copyShareTextToClipboard,
   shareNative
 } from '../utils/shareUtils.ts';
+
 
 interface WhatsAppShareModalProps {
   post: NewsPost | null;
@@ -78,13 +80,14 @@ export default function WhatsAppShareModal({ post, isOpen, onClose }: WhatsAppSh
   const handleDownloadImage = () => {
     if (!post.coverImage) return;
     const a = document.createElement('a');
-    a.href = post.coverImage;
+    a.href = getArticleImageUrl(post);
     a.download = `jornal-aberto-${post.id}-imagem.jpg`;
     a.target = '_blank';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
   };
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-fade-in">
