@@ -31,6 +31,8 @@ import {
 } from '../services/newsService.ts';
 import { auth, signInWithPopup, googleProvider } from '../firebase/config.ts';
 import ImageStudioModal from './ImageStudioModal.tsx';
+import WhatsAppShareModal, { WhatsAppIcon } from './WhatsAppShareModal.tsx';
+import { updateArticleOpenGraphMeta, openWhatsAppShare } from '../utils/shareUtils.ts';
 
 interface ArticleDetailViewProps {
   post: NewsPost;
@@ -43,6 +45,8 @@ export default function ArticleDetailView({ post, onBack, onDeleted }: ArticleDe
   const [likesCount, setLikesCount] = useState(post.likes);
   const [hasLiked, setHasLiked] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
+  const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
+
   
   const [comments, setComments] = useState<NewsComment[]>(post.comments || []);
   const [commentInput, setCommentInput] = useState('');
@@ -61,10 +65,16 @@ export default function ArticleDetailView({ post, onBack, onDeleted }: ArticleDe
   const [isStudioOpen, setIsStudioOpen] = useState(false);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
 
-  // Increment view count on mount
+  // Increment view count on mount and update Open Graph tags for WhatsApp sharing
   useEffect(() => {
     incrementPostViews(post.id);
-  }, [post.id]);
+    updateArticleOpenGraphMeta(currentPost);
+
+    return () => {
+      updateArticleOpenGraphMeta(null);
+    };
+  }, [post.id, currentPost]);
+
 
   // Check if current user liked
   useEffect(() => {
@@ -286,14 +296,25 @@ export default function ArticleDetailView({ post, onBack, onDeleted }: ArticleDe
             </button>
           </div>
 
+          {/* WhatsApp Share */}
+          <button
+            onClick={() => setIsWhatsAppModalOpen(true)}
+            className="p-2.5 rounded-xl border border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-xs active:scale-95"
+            title="Compartilhar no WhatsApp com imagem e enunciado"
+          >
+            <WhatsAppIcon className="w-4 h-4 text-[#25D366]" />
+            <span className="hidden sm:inline">WhatsApp</span>
+          </button>
+
           {/* Share */}
           <button
             onClick={handleShare}
             className="p-2.5 rounded-xl border border-stone-200 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800 bg-white dark:bg-stone-800/80 text-stone-700 dark:text-stone-200 text-xs font-semibold flex items-center gap-1.5 transition-colors"
           >
             {copiedLink ? <Check className="w-4 h-4 text-emerald-600" /> : <Share2 className="w-4 h-4" />}
-            <span className="hidden sm:inline">{copiedLink ? 'Copiado!' : 'Compartilhar'}</span>
+            <span className="hidden sm:inline">{copiedLink ? 'Copiado!' : 'Copiar Link'}</span>
           </button>
+
 
           {/* Delete (if author) */}
           {isAuthor && (
@@ -396,6 +417,34 @@ export default function ArticleDetailView({ post, onBack, onDeleted }: ArticleDe
         )}
       </figure>
 
+      {/* WhatsApp Feature Share Banner */}
+      <div className="mb-8 p-4 sm:p-5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/60 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+        <div className="flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-2xl bg-[#25D366] text-stone-950 flex items-center justify-center shrink-0 shadow-md">
+            <WhatsAppIcon className="w-6 h-6 text-stone-950" />
+          </div>
+          <div>
+            <h4 className="font-bold text-sm sm:text-base text-stone-900 dark:text-stone-100 flex items-center gap-2">
+              Compartilhar matéria no WhatsApp
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-600/15 text-emerald-700 dark:text-emerald-400 font-bold uppercase">
+                Foto + Enunciado
+              </span>
+            </h4>
+            <p className="text-xs text-stone-600 dark:text-stone-300">
+              Gera a mensagem com manchete formatada, linha-fina, imagem de capa e link direto.
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={() => setIsWhatsAppModalOpen(true)}
+          className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] active:scale-95 text-stone-950 font-black text-xs flex items-center justify-center gap-2 shadow-md shadow-[#25D366]/25 transition-all shrink-0 cursor-pointer"
+        >
+          <WhatsAppIcon className="w-4 h-4 text-stone-950" />
+          <span>Enviar no WhatsApp</span>
+        </button>
+      </div>
+
+
       {/* ARTICLE BODY */}
       <div 
         className={`font-serif text-stone-800 dark:text-stone-200 leading-relaxed mb-12 space-y-6 ${
@@ -464,7 +513,16 @@ export default function ArticleDetailView({ post, onBack, onDeleted }: ArticleDe
             Deixe sua curtida e apoie a circulação livre de informações na base pública do Jornal Aberto.
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            onClick={() => setIsWhatsAppModalOpen(true)}
+            className="px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-stone-950 shadow-md shadow-[#25D366]/20 transition-all cursor-pointer"
+            title="Compartilhar matéria com amigos e grupos no WhatsApp"
+          >
+            <WhatsAppIcon className="w-4 h-4 text-stone-950" />
+            <span>Compartilhar no WhatsApp</span>
+          </button>
+
           <button
             onClick={handleToggleLike}
             className={`px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition-all ${
@@ -477,6 +535,7 @@ export default function ArticleDetailView({ post, onBack, onDeleted }: ArticleDe
             {hasLiked ? 'Curtido por você' : 'Curtir Notícia'} ({likesCount})
           </button>
         </div>
+
       </div>
 
       {/* COMMENTS SECTION */}
@@ -649,6 +708,14 @@ export default function ArticleDetailView({ post, onBack, onDeleted }: ArticleDe
         initialCategory=""
       />
 
+      {/* WhatsApp Share Modal with rich preview */}
+      <WhatsAppShareModal
+        post={currentPost}
+        isOpen={isWhatsAppModalOpen}
+        onClose={() => setIsWhatsAppModalOpen(false)}
+      />
+
     </article>
+
   );
 }

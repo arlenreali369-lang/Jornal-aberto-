@@ -27,7 +27,8 @@ import {
   subscribeToPosts, 
   seedInitialPostsIfEmpty, 
   toggleLikePost,
-  checkIfUserLiked
+  checkIfUserLiked,
+  getNewsPostById
 } from './services/newsService.ts';
 import { 
   auth, 
@@ -40,6 +41,8 @@ import {
 } from './firebase/config.ts';
 import CreateNewsModal from './components/CreateNewsModal.tsx';
 import ArticleDetailView from './components/ArticleDetailView.tsx';
+import WhatsAppShareModal, { WhatsAppIcon } from './components/WhatsAppShareModal.tsx';
+
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -80,8 +83,77 @@ export default function App() {
   // Navigation: Detail view
   const [selectedPost, setSelectedPost] = useState<NewsPost | null>(null);
 
+  // WhatsApp Share Modal state
+  const [postToShareWhatsApp, setPostToShareWhatsApp] = useState<NewsPost | null>(null);
+
   // Modals
   const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
+
+  // URL Deep-Linking: Open article from ?materia=<id> or ?artigo=<id>
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const materiaId = params.get('materia') || params.get('artigo');
+    if (materiaId) {
+      const found = posts.find((p) => p.id === materiaId);
+      if (found) {
+        setSelectedPost(found);
+      } else if (!isLoading) {
+        getNewsPostById(materiaId).then((p) => {
+          if (p) setSelectedPost(p);
+        });
+      }
+    }
+  }, [posts, isLoading]);
+
+  // Popstate listener for browser forward/back buttons
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const materiaId = params.get('materia') || params.get('artigo');
+      if (!materiaId) {
+        setSelectedPost(null);
+      } else {
+        const found = posts.find((p) => p.id === materiaId);
+        if (found) {
+          setSelectedPost(found);
+        } else {
+          getNewsPostById(materiaId).then((p) => {
+            if (p) setSelectedPost(p);
+          });
+        }
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [posts]);
+
+  // Navigate to article with canonical ?materia= in URL
+  const handleOpenPost = (post: NewsPost) => {
+    setSelectedPost(post);
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set('materia', post.id);
+      window.history.pushState({ materiaId: post.id }, '', url.toString());
+    } catch (e) {
+      console.warn('URL pushState notice:', e);
+    }
+  };
+
+  // Back to feed and clean URL query param
+  const handleBackToFeed = () => {
+    setSelectedPost(null);
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('materia');
+      url.searchParams.delete('artigo');
+      window.history.pushState({}, '', url.pathname + (url.search ? url.search : ''));
+    } catch (e) {
+      console.warn('URL replace notice:', e);
+    }
+  };
 
   // Auth listener
   useEffect(() => {
@@ -111,6 +183,7 @@ export default function App() {
       if (unsubPosts) unsubPosts();
     };
   }, []);
+
 
   const handleLogin = async () => {
     try {
@@ -252,7 +325,7 @@ export default function App() {
             {/* Logo and Tagline */}
             <div 
               onClick={() => {
-                setSelectedPost(null);
+                handleBackToFeed();
                 setSelectedCategory('Todos');
                 setSearchQuery('');
               }}
@@ -313,7 +386,7 @@ export default function App() {
               Plantão Urgente
             </span>
             <div 
-              onClick={() => setSelectedPost(breakingPost)}
+              onClick={() => handleOpenPost(breakingPost)}
               className="truncate cursor-pointer hover:underline text-stone-100 font-serif text-sm flex-1"
             >
               <strong>{breakingPost.title}</strong> — {breakingPost.subtitle || 'Confira os desdobramentos na íntegra.'}
@@ -329,13 +402,14 @@ export default function App() {
         {selectedPost ? (
           <ArticleDetailView
             post={selectedPost}
-            onBack={() => setSelectedPost(null)}
+            onBack={handleBackToFeed}
             onDeleted={(deletedId) => {
               setPosts(prev => prev.filter(p => p.id !== deletedId));
-              setSelectedPost(null);
+              handleBackToFeed();
             }}
           />
         ) : (
+
           <div className="space-y-10 animate-fade-in">
             
             {/* Feed Subheader with Sorting & Status */}
@@ -418,7 +492,7 @@ export default function App() {
                   
                   {/* Lead Image (created by author) */}
                   <div 
-                    onClick={() => setSelectedPost(leadPost)}
+                    onClick={() => handleOpenPost(leadPost)}
                     className="lg:col-span-7 relative aspect-[16/9] lg:aspect-auto cursor-pointer overflow-hidden bg-stone-900"
                   >
                     <img
@@ -451,7 +525,7 @@ export default function App() {
                       </div>
 
                       <h3 
-                        onClick={() => setSelectedPost(leadPost)}
+                        onClick={() => handleOpenPost(leadPost)}
                         className="font-serif font-black text-2xl sm:text-3xl lg:text-4xl text-stone-950 dark:text-stone-100 leading-[1.15] cursor-pointer group-hover:text-amber-800 dark:group-hover:text-amber-400 transition-colors"
                       >
                         {leadPost.title}
@@ -482,7 +556,20 @@ export default function App() {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-3 text-xs font-semibold text-stone-500 dark:text-stone-400">
+                      <div className="flex items-center gap-2.5 text-xs font-semibold text-stone-500 dark:text-stone-400">
+                        {/* WhatsApp Direct Share Button */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPostToShareWhatsApp(leadPost);
+                          }}
+                          className="px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
+                          title="Compartilhar matéria no WhatsApp com foto e enunciado"
+                        >
+                          <WhatsAppIcon className="w-3.5 h-3.5 text-[#25D366]" />
+                          <span className="hidden sm:inline">WhatsApp</span>
+                        </button>
+
                         <span className="flex items-center gap-1 hover:text-rose-600 transition-colors">
                           <Heart className="w-3.5 h-3.5 text-rose-500" />
                           {leadPost.likes}
@@ -493,6 +580,7 @@ export default function App() {
                         </span>
                       </div>
                     </div>
+
 
                   </div>
                 </div>
@@ -505,7 +593,7 @@ export default function App() {
                 {secondaryPosts.map((post) => (
                   <article
                     key={post.id}
-                    onClick={() => setSelectedPost(post)}
+                    onClick={() => handleOpenPost(post)}
                     className="bg-white dark:bg-[#18191d] rounded-2xl border border-stone-200/90 dark:border-stone-800 shadow-2xs hover:shadow-lg dark:shadow-black/50 transition-all overflow-hidden flex flex-col cursor-pointer group hover:-translate-y-1 duration-200"
                   >
                     {/* Cover Photo */}
@@ -562,7 +650,20 @@ export default function App() {
                           </span>
                         </div>
 
-                        <div className="flex items-center gap-2.5 text-stone-400 font-medium">
+                        <div className="flex items-center gap-2 text-stone-400 font-medium">
+                          {/* Quick WhatsApp Share from feed */}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPostToShareWhatsApp(post);
+                            }}
+                            className="p-1.5 rounded-lg hover:bg-emerald-500/15 text-stone-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                            title="Compartilhar no WhatsApp com imagem e enunciado"
+                            aria-label="Compartilhar no WhatsApp"
+                          >
+                            <WhatsAppIcon className="w-3.5 h-3.5 text-[#25D366]" />
+                          </button>
+
                           <span className="flex items-center gap-1">
                             <Heart className="w-3 h-3 text-rose-500" />
                             {post.likes}
@@ -579,6 +680,7 @@ export default function App() {
                 ))}
               </div>
             )}
+
 
             {/* INVITATION CALLOUT BANNER */}
             <div className="p-8 rounded-3xl bg-stone-900 dark:bg-[#151619] text-stone-100 relative overflow-hidden shadow-xl border border-stone-800 dark:border-stone-800/80 flex flex-col md:flex-row items-center justify-between gap-6">
@@ -645,11 +747,19 @@ export default function App() {
           // Look for newly created post or switch view
           const found = posts.find(p => p.id === newId);
           if (found) {
-            setSelectedPost(found);
+            handleOpenPost(found);
           }
         }}
       />
 
+      {/* MODAL: WHATSAPP SHARE FROM FEED */}
+      <WhatsAppShareModal
+        post={postToShareWhatsApp}
+        isOpen={Boolean(postToShareWhatsApp)}
+        onClose={() => setPostToShareWhatsApp(null)}
+      />
+
     </div>
+
   );
 }

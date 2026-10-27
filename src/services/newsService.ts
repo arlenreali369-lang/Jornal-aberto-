@@ -297,3 +297,39 @@ export async function updateNewsPost(
     handleFirestoreError(error, OperationType.UPDATE, path);
   }
 }
+
+/**
+ * Fetch a single post by ID (for deep links)
+ */
+export async function getNewsPostById(postId: string): Promise<NewsPost | null> {
+  const path = `${POSTS_PATH}/${postId}`;
+  try {
+    const snap = await getDoc(doc(db, POSTS_PATH, postId));
+    if (!snap.exists()) return null;
+    const data = snap.data();
+    return {
+      id: snap.id,
+      title: data.title || '',
+      subtitle: data.subtitle || '',
+      content: data.content || '',
+      category: data.category || 'Geral',
+      coverImage: data.coverImage || '',
+      coverCaption: data.coverCaption || '',
+      authorName: data.authorName || 'Redator Anônimo',
+      authorHandle: data.authorHandle || '@redacao',
+      authorAvatar: data.authorAvatar || '',
+      tags: Array.isArray(data.tags) ? data.tags : [],
+      likes: typeof data.likes === 'number' ? data.likes : 0,
+      views: typeof data.views === 'number' ? data.views : 0,
+      featured: Boolean(data.featured),
+      breakingNews: Boolean(data.breakingNews),
+      comments: Array.isArray(data.comments) ? data.comments : [],
+      createdAt: data.createdAt || new Date().toISOString(),
+      readTimeMinutes: typeof data.readTimeMinutes === 'number' ? data.readTimeMinutes : 3,
+    } as NewsPost;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.GET, path);
+    return null;
+  }
+}
+
