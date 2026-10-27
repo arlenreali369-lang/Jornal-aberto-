@@ -17,7 +17,10 @@ import {
   RefreshCw,
   ExternalLink,
   SlidersHorizontal,
-  Bookmark
+  Bookmark,
+  Sun,
+  Moon,
+  BookOpen
 } from 'lucide-react';
 import { NewsPost, NewsCategory } from './types/news.ts';
 import { 
@@ -45,6 +48,34 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState<NewsCategory>('Todos');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortBy, setSortBy] = useState<'recent' | 'popular'>('recent');
+
+  // Theme state: reading-focused dark mode and light mode
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('jornal_aberto_theme');
+      if (saved === 'dark' || saved === 'light') return saved;
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return 'dark';
+      }
+    }
+    return 'light';
+  });
+
+  // Apply theme class to documentElement
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+      localStorage.setItem('jornal_aberto_theme', 'dark');
+    } else {
+      root.classList.remove('dark');
+      localStorage.setItem('jornal_aberto_theme', 'light');
+    }
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
+  };
 
   // Navigation: Detail view
   const [selectedPost, setSelectedPost] = useState<NewsPost | null>(null);
@@ -141,10 +172,10 @@ export default function App() {
   });
 
   return (
-    <div className="min-h-screen bg-stone-100 text-stone-900 flex flex-col font-sans selection:bg-amber-500/20 selection:text-amber-900">
+    <div className="min-h-screen bg-stone-100 dark:bg-[#121316] text-stone-900 dark:text-stone-100 flex flex-col font-sans selection:bg-amber-500/20 selection:text-amber-900 transition-colors duration-300">
       
       {/* 1. TOP UTILITY BAR */}
-      <div className="border-b border-stone-200 bg-stone-900 text-stone-300 text-xs py-2 px-4 sm:px-8">
+      <div className="border-b border-stone-200 dark:border-stone-800/80 bg-stone-900 dark:bg-[#0c0d0f] text-stone-300 text-xs py-2 px-4 sm:px-8">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-4">
             <span className="font-mono text-stone-400 capitalize">
@@ -158,6 +189,28 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Quick theme toggle in top bar */}
+            <button
+              onClick={toggleTheme}
+              className="flex items-center gap-1.5 text-stone-300 hover:text-white px-2 py-0.5 rounded text-[11px] font-mono transition-colors"
+              title={theme === 'dark' ? 'Mudar para Modo Claro' : 'Mudar para Modo Leitura (Escuro)'}
+              aria-label="Alternar tema"
+            >
+              {theme === 'dark' ? (
+                <>
+                  <Sun className="w-3.5 h-3.5 text-amber-400" />
+                  <span className="hidden sm:inline">Modo Claro</span>
+                </>
+              ) : (
+                <>
+                  <Moon className="w-3.5 h-3.5 text-amber-400" />
+                  <span className="hidden sm:inline">Modo Leitura</span>
+                </>
+              )}
+            </button>
+
+            <span className="text-stone-700">|</span>
+
             {currentUser ? (
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2">
@@ -192,7 +245,7 @@ export default function App() {
       </div>
 
       {/* 2. EDITORIAL MASTHEAD */}
-      <header className="border-b border-stone-300 bg-white shadow-xs">
+      <header className="border-b border-stone-300 dark:border-stone-800 bg-white dark:bg-[#18191d] shadow-xs transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-8 py-6 sm:py-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             
@@ -206,20 +259,40 @@ export default function App() {
               className="text-center md:text-left cursor-pointer group"
             >
               <div className="flex items-center justify-center md:justify-start gap-3 mb-1">
-                <span className="p-2 rounded-xl bg-stone-900 text-amber-400 group-hover:scale-105 transition-transform">
+                <span className="p-2 rounded-xl bg-stone-900 dark:bg-stone-800 text-amber-400 group-hover:scale-105 transition-transform">
                   <Newspaper className="w-7 h-7" />
                 </span>
-                <h1 className="font-serif font-black text-4xl sm:text-5xl text-stone-950 tracking-tighter">
+                <h1 className="font-serif font-black text-4xl sm:text-5xl text-stone-950 dark:text-stone-100 tracking-tighter">
                   JORNAL ABERTO
                 </h1>
               </div>
-              <p className="font-mono text-xs uppercase tracking-widest text-stone-500">
+              <p className="font-mono text-xs uppercase tracking-widest text-stone-500 dark:text-stone-400">
                 Rede Pública &bull; Jornalismo Colaborativo &bull; Imagens Livres
               </p>
             </div>
 
-            {/* Actions: Write News & Create Image */}
+            {/* Actions: Theme Toggle & Write News */}
             <div className="flex items-center gap-3">
+              {/* Reading Theme Toggle Button in Header */}
+              <button
+                onClick={toggleTheme}
+                title={theme === 'dark' ? 'Mudar para Modo Claro (Diurno)' : 'Mudar para Modo Leitura (Escuro Confortável)'}
+                aria-label={theme === 'dark' ? 'Alternar para modo claro' : 'Alternar para modo escuro focado na leitura'}
+                className="px-4 py-3 rounded-xl border border-stone-300 dark:border-stone-700/80 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800/90 dark:hover:bg-stone-700/90 text-stone-800 dark:text-stone-100 font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all active:scale-95 shadow-xs"
+              >
+                {theme === 'dark' ? (
+                  <>
+                    <Sun className="w-4 h-4 text-amber-400 animate-pulse" />
+                    <span>Modo Claro</span>
+                  </>
+                ) : (
+                  <>
+                    <Moon className="w-4 h-4 text-stone-700" />
+                    <span>Modo Leitura</span>
+                  </>
+                )}
+              </button>
+
               <button
                 onClick={() => setIsCreateModalOpen(true)}
                 className="px-5 py-3 rounded-xl bg-amber-600 hover:bg-amber-700 active:scale-95 text-white font-bold text-sm flex items-center gap-2 shadow-lg shadow-amber-600/25 transition-all group"
@@ -266,26 +339,26 @@ export default function App() {
           <div className="space-y-10 animate-fade-in">
             
             {/* Feed Subheader with Sorting & Status */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-300">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-stone-300 dark:border-stone-800">
               <div className="flex items-center gap-3">
-                <h2 className="font-serif font-black text-2xl text-stone-900 tracking-tight">
+                <h2 className="font-serif font-black text-2xl text-stone-900 dark:text-stone-100 tracking-tight">
                   {selectedCategory === 'Todos' ? 'Edição Geral' : selectedCategory}
                 </h2>
-                <span className="text-xs font-mono text-stone-500 bg-stone-200/80 px-2 py-0.5 rounded-full font-semibold">
+                <span className="text-xs font-mono text-stone-500 dark:text-stone-400 bg-stone-200/80 dark:bg-stone-800 px-2 py-0.5 rounded-full font-semibold">
                   {filteredPosts.length} {filteredPosts.length === 1 ? 'notícia' : 'notícias'} públicas
                 </span>
               </div>
 
               {/* Sort Selector */}
               <div className="flex items-center gap-2 text-xs">
-                <span className="text-stone-500 font-medium">Ordenar por:</span>
-                <div className="flex rounded-lg border border-stone-300 bg-white p-0.5">
+                <span className="text-stone-500 dark:text-stone-400 font-medium">Ordenar por:</span>
+                <div className="flex rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 p-0.5">
                   <button
                     onClick={() => setSortBy('recent')}
                     className={`px-3 py-1 rounded-md font-semibold transition-all ${
                       sortBy === 'recent'
-                        ? 'bg-stone-900 text-white'
-                        : 'text-stone-600 hover:text-stone-900'
+                        ? 'bg-stone-900 dark:bg-amber-600 text-white'
+                        : 'text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white'
                     }`}
                   >
                     Mais Recentes
@@ -294,8 +367,8 @@ export default function App() {
                     onClick={() => setSortBy('popular')}
                     className={`px-3 py-1 rounded-md font-semibold transition-all ${
                       sortBy === 'popular'
-                        ? 'bg-stone-900 text-white'
-                        : 'text-stone-600 hover:text-stone-900'
+                        ? 'bg-stone-900 dark:bg-amber-600 text-white'
+                        : 'text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white'
                     }`}
                   >
                     Mais Populares
@@ -306,14 +379,14 @@ export default function App() {
 
             {/* Empty State */}
             {sortedPosts.length === 0 && !isLoading && (
-              <div className="py-20 text-center bg-white rounded-3xl border border-stone-200 shadow-sm p-8 space-y-4">
-                <div className="w-16 h-16 mx-auto rounded-full bg-amber-500/10 text-amber-700 flex items-center justify-center">
+              <div className="py-20 text-center bg-white dark:bg-[#18191d] rounded-3xl border border-stone-200 dark:border-stone-800 shadow-sm p-8 space-y-4">
+                <div className="w-16 h-16 mx-auto rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 flex items-center justify-center">
                   <Newspaper className="w-8 h-8" />
                 </div>
-                <h3 className="font-serif font-bold text-xl text-stone-800">
+                <h3 className="font-serif font-bold text-xl text-stone-800 dark:text-stone-100">
                   Nenhuma notícia encontrada para este filtro
                 </h3>
-                <p className="text-sm text-stone-500 max-w-md mx-auto">
+                <p className="text-sm text-stone-500 dark:text-stone-400 max-w-md mx-auto">
                   {searchQuery 
                     ? `Não foram encontrados resultados para "${searchQuery}". Tente outros termos.`
                     : 'Esta editoria ainda não possui postagens cadastradas. Que tal ser o primeiro a publicar?'}
@@ -332,7 +405,7 @@ export default function App() {
             {isLoading && (
               <div className="py-24 text-center space-y-3">
                 <RefreshCw className="w-8 h-8 text-amber-600 animate-spin mx-auto" />
-                <p className="text-sm font-serif text-stone-500">
+                <p className="text-sm font-serif text-stone-500 dark:text-stone-400">
                   Carregando matérias da base pública de notícias...
                 </p>
               </div>
@@ -340,7 +413,7 @@ export default function App() {
 
             {/* HERO LEAD STORY (Capitular) */}
             {leadPost && (
-              <section className="bg-white rounded-3xl border border-stone-200/90 shadow-md hover:shadow-xl transition-all overflow-hidden group">
+              <section className="bg-white dark:bg-[#18191d] rounded-3xl border border-stone-200/90 dark:border-stone-800 shadow-md hover:shadow-xl dark:shadow-black/50 transition-all overflow-hidden group">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-0">
                   
                   {/* Lead Image (created by author) */}
@@ -351,7 +424,7 @@ export default function App() {
                     <img
                       src={leadPost.coverImage}
                       alt={leadPost.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 dark:brightness-[0.93]"
                     />
                     <div className="absolute top-4 left-4 flex gap-2">
                       {leadPost.breakingNews && (
@@ -360,7 +433,7 @@ export default function App() {
                         </span>
                       )}
                       {leadPost.category && leadPost.category !== 'Sociedade' && (
-                        <span className="px-3 py-1 rounded-md bg-stone-900/90 backdrop-blur-md text-amber-400 text-xs font-bold uppercase tracking-wider shadow-md">
+                        <span className="px-3 py-1 rounded-md bg-stone-900/90 dark:bg-stone-950/90 backdrop-blur-md text-amber-400 text-xs font-bold uppercase tracking-wider shadow-md">
                           {leadPost.category}
                         </span>
                       )}
@@ -370,7 +443,7 @@ export default function App() {
                   {/* Lead Editorial Copy */}
                   <div className="lg:col-span-5 p-6 sm:p-8 lg:p-10 flex flex-col justify-between">
                     <div className="space-y-4">
-                      <div className="flex items-center gap-2 text-xs text-stone-500 font-mono">
+                      <div className="flex items-center gap-2 text-xs text-stone-500 dark:text-stone-400 font-mono">
                         <Clock className="w-3.5 h-3.5" />
                         <span>{leadPost.readTimeMinutes} min de leitura</span>
                         <span>&bull;</span>
@@ -379,28 +452,28 @@ export default function App() {
 
                       <h3 
                         onClick={() => setSelectedPost(leadPost)}
-                        className="font-serif font-black text-2xl sm:text-3xl lg:text-4xl text-stone-950 leading-[1.15] cursor-pointer group-hover:text-amber-800 transition-colors"
+                        className="font-serif font-black text-2xl sm:text-3xl lg:text-4xl text-stone-950 dark:text-stone-100 leading-[1.15] cursor-pointer group-hover:text-amber-800 dark:group-hover:text-amber-400 transition-colors"
                       >
                         {leadPost.title}
                       </h3>
 
                       {leadPost.subtitle && (
-                        <p className="font-serif text-sm sm:text-base text-stone-600 leading-relaxed line-clamp-3">
+                        <p className="font-serif text-sm sm:text-base text-stone-600 dark:text-stone-300 leading-relaxed line-clamp-3">
                           {leadPost.subtitle}
                         </p>
                       )}
                     </div>
 
                     {/* Author & Footer Interactions */}
-                    <div className="pt-6 border-t border-stone-100 flex items-center justify-between mt-6">
+                    <div className="pt-6 border-t border-stone-100 dark:border-stone-800/80 flex items-center justify-between mt-6">
                       <div className="flex items-center gap-2.5">
                         <img
                           src={leadPost.authorAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=100'}
                           alt={leadPost.authorName}
-                          className="w-9 h-9 rounded-full object-cover border border-stone-200"
+                          className="w-9 h-9 rounded-full object-cover border border-stone-200 dark:border-stone-700"
                         />
                         <div>
-                          <span className="font-bold text-xs text-stone-900 block leading-tight">
+                          <span className="font-bold text-xs text-stone-900 dark:text-stone-200 block leading-tight">
                             {leadPost.authorName}
                           </span>
                           <span className="text-[11px] text-stone-400 font-mono">
@@ -409,12 +482,12 @@ export default function App() {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-3 text-xs font-semibold text-stone-500">
+                      <div className="flex items-center gap-3 text-xs font-semibold text-stone-500 dark:text-stone-400">
                         <span className="flex items-center gap-1 hover:text-rose-600 transition-colors">
                           <Heart className="w-3.5 h-3.5 text-rose-500" />
                           {leadPost.likes}
                         </span>
-                        <span className="flex items-center gap-1 hover:text-stone-900 transition-colors">
+                        <span className="flex items-center gap-1 hover:text-stone-900 dark:hover:text-stone-200 transition-colors">
                           <MessageSquare className="w-3.5 h-3.5 text-stone-400" />
                           {leadPost.comments?.length || 0}
                         </span>
@@ -433,14 +506,14 @@ export default function App() {
                   <article
                     key={post.id}
                     onClick={() => setSelectedPost(post)}
-                    className="bg-white rounded-2xl border border-stone-200/90 shadow-2xs hover:shadow-lg transition-all overflow-hidden flex flex-col cursor-pointer group hover:-translate-y-1 duration-200"
+                    className="bg-white dark:bg-[#18191d] rounded-2xl border border-stone-200/90 dark:border-stone-800 shadow-2xs hover:shadow-lg dark:shadow-black/50 transition-all overflow-hidden flex flex-col cursor-pointer group hover:-translate-y-1 duration-200"
                   >
                     {/* Cover Photo */}
                     <div className="relative aspect-[16/9] w-full overflow-hidden bg-stone-900">
                       <img
                         src={post.coverImage}
                         alt={post.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 dark:brightness-[0.93]"
                       />
                       <div className="absolute top-3 left-3 flex gap-1.5">
                         {post.breakingNews && (
@@ -465,26 +538,26 @@ export default function App() {
                           <span>{new Date(post.createdAt).toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' })}</span>
                         </div>
 
-                        <h4 className="font-serif font-black text-xl text-stone-900 leading-snug group-hover:text-amber-700 transition-colors line-clamp-2">
+                        <h4 className="font-serif font-black text-xl text-stone-900 dark:text-stone-100 leading-snug group-hover:text-amber-700 dark:group-hover:text-amber-400 transition-colors line-clamp-2">
                           {post.title}
                         </h4>
 
                         {post.subtitle && (
-                          <p className="font-serif text-xs text-stone-600 line-clamp-2 leading-relaxed">
+                          <p className="font-serif text-xs text-stone-600 dark:text-stone-300 line-clamp-2 leading-relaxed">
                             {post.subtitle}
                           </p>
                         )}
                       </div>
 
                       {/* Author & Metrics */}
-                      <div className="pt-3 border-t border-stone-100 flex items-center justify-between text-xs">
+                      <div className="pt-3 border-t border-stone-100 dark:border-stone-800/80 flex items-center justify-between text-xs">
                         <div className="flex items-center gap-2">
                           <img
                             src={post.authorAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=80'}
                             alt={post.authorName}
-                            className="w-6 h-6 rounded-full object-cover border border-stone-200"
+                            className="w-6 h-6 rounded-full object-cover border border-stone-200 dark:border-stone-700"
                           />
-                          <span className="font-medium text-stone-700 text-xs truncate max-w-[120px]">
+                          <span className="font-medium text-stone-700 dark:text-stone-300 text-xs truncate max-w-[120px]">
                             {post.authorName}
                           </span>
                         </div>
@@ -508,7 +581,7 @@ export default function App() {
             )}
 
             {/* INVITATION CALLOUT BANNER */}
-            <div className="p-8 rounded-3xl bg-stone-900 text-stone-100 relative overflow-hidden shadow-xl border border-stone-800 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="p-8 rounded-3xl bg-stone-900 dark:bg-[#151619] text-stone-100 relative overflow-hidden shadow-xl border border-stone-800 dark:border-stone-800/80 flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="space-y-2 text-center md:text-left z-10 max-w-xl">
                 <span className="px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 text-xs font-mono font-bold tracking-wide uppercase inline-flex items-center gap-1.5">
                   <Palette className="w-3.5 h-3.5" />
@@ -540,7 +613,7 @@ export default function App() {
       </main>
 
       {/* 6. EDITORIAL FOOTER */}
-      <footer className="border-t border-stone-300 bg-stone-900 text-stone-400 text-xs py-10 px-4 sm:px-8 mt-16">
+      <footer className="border-t border-stone-300 dark:border-stone-800 bg-stone-900 dark:bg-[#0c0d0f] text-stone-400 text-xs py-10 px-4 sm:px-8 mt-16">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
             <Newspaper className="w-6 h-6 text-amber-400" />

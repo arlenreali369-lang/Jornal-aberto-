@@ -172,26 +172,26 @@ export default function CreateNewsModal({
   return (
     <>
       <div className="fixed inset-0 z-40 flex items-center justify-center p-3 sm:p-6 bg-stone-900/80 backdrop-blur-md animate-fade-in">
-        <div className="bg-stone-50 text-stone-900 rounded-2xl w-full max-w-4xl max-h-[94vh] flex flex-col shadow-2xl overflow-hidden border border-stone-200">
+        <div className="bg-stone-50 dark:bg-[#18191d] text-stone-900 dark:text-stone-100 rounded-2xl w-full max-w-4xl max-h-[94vh] flex flex-col shadow-2xl overflow-hidden border border-stone-200 dark:border-stone-800">
           
           {/* Header */}
-          <div className="px-6 py-4 border-b border-stone-200 bg-white flex items-center justify-between">
+          <div className="px-6 py-4 border-b border-stone-200 dark:border-stone-800 bg-white dark:bg-[#1a1b1f] flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-700 border border-amber-500/20">
+              <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20">
                 <FileText className="w-5 h-5" />
               </div>
               <div>
-                <h2 className="text-lg font-bold font-serif text-stone-900 tracking-tight">
+                <h2 className="text-lg font-bold font-serif text-stone-900 dark:text-stone-100 tracking-tight">
                   Nova Notícia &bull; Redação Pública
                 </h2>
-                <p className="text-xs text-stone-500 font-sans">
+                <p className="text-xs text-stone-500 dark:text-stone-400 font-sans">
                   Escreva e ilustre sua notícia para que todos os leitores da rede possam visualizar em tempo real.
                 </p>
               </div>
             </div>
             <button 
               onClick={onClose}
-              className="p-2 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors"
+              className="p-2 rounded-lg text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
