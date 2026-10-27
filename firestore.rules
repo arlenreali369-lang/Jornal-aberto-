@@ -1,0 +1,91 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidPost(data) {
+      return data.keys().hasAll(['title', 'content', 'category', 'coverImage', 'authorId', 'authorName', 'createdAt'])
+        && data.authorId == request.auth.uid
+        && data.title is string && data.title.size() > 0 && data.title.size() <= 300
+        && data.content is string && data.content.size() > 0 && data.content.size() <= 50000
+        && data.category is string && data.category.size() <= 50
+        && data.coverImage is string && data.coverImage.size() <= 800000
+        && data.authorName is string && data.authorName.size() <= 100
+        && (!('subtitle' in data) || (data.subtitle is string && data.subtitle.size() <= 500))
+        && (!('coverCaption' in data) || (data.coverCaption is string && data.coverCaption.size() <= 300))
+        && (!('authorAvatar' in data) || (data.authorAvatar is string && data.authorAvatar.size() <= 500))
+        && (!('tags' in data) || (data.tags is list && data.tags.size() <= 15))
+        && (!('likes' in data) || data.likes is number)
+        && (!('views' in data) || data.views is number)
+        && (!('featured' in data) || data.featured is bool)
+        && (!('breakingNews' in data) || data.breakingNews is bool)
+        && (!('readTimeMinutes' in data) || data.readTimeMinutes is number)
+        && data.createdAt is string && data.createdAt.size() <= 50;
+    }
+
+    function isValidComment(data) {
+      return data.keys().hasAll(['postId', 'authorId', 'authorName', 'content', 'createdAt'])
+        && data.authorId == request.auth.uid
+        && data.postId is string && data.postId.size() <= 128
+        && data.authorName is string && data.authorName.size() <= 100
+        && data.content is string && data.content.size() > 0 && data.content.size() <= 2000
+        && (!('authorAvatar' in data) || (data.authorAvatar is string && data.authorAvatar.size() <= 500))
+        && data.createdAt is string && data.createdAt.size() <= 50;
+    }
+
+    function isValidLike(data) {
+      return data.keys().hasAll(['postId', 'userId', 'createdAt'])
+        && data.userId == request.auth.uid
+        && data.postId is string && data.postId.size() <= 128
+        && data.createdAt is string && data.createdAt.size() <= 50;
+    }
+
+    // Public News Posts
+    match /posts/{postId} {
+      allow read: if true;
+      allow create: if isValidId(postId) && isSignedIn() && isValidPost(incoming());
+      allow update: if isValidId(postId) && (
+        (isSignedIn() && existing().authorId == request.auth.uid && isValidPost(incoming()) && incoming().authorId == existing().authorId && incoming().createdAt == existing().createdAt)
+        ||
+        (incoming().diff(existing()).affectedKeys().hasOnly(['likes']))
+        ||
+        (incoming().diff(existing()).affectedKeys().hasOnly(['views']))
+      );
+      allow delete: if isValidId(postId) && isSignedIn() && existing().authorId == request.auth.uid;
+
+      // Subcollection for comments
+      match /comments/{commentId} {
+        allow read: if isValidId(postId);
+        allow create: if isValidId(postId) && isValidId(commentId) && isSignedIn() && isValidComment(incoming());
+        allow delete: if isValidId(postId) && isValidId(commentId) && isSignedIn() && existing().authorId == request.auth.uid;
+      }
+
+      // Subcollection for likes
+      match /likes/{userId} {
+        allow read: if isValidId(postId);
+        allow create, update: if isValidId(postId) && isValidId(userId) && isSignedIn() && userId == request.auth.uid && isValidLike(incoming());
+        allow delete: if isValidId(postId) && isValidId(userId) && isSignedIn() && userId == request.auth.uid;
+      }
+    }
+  }
+}

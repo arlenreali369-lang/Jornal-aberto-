@@ -1,0 +1,6 @@
+{
+  "name": "Jornal Aberto - Portal Público de Notícias",
+  "description": "Crie, ilustre e publique notícias com imagens em uma base pública colaborativa para toda a comunidade ler e interagir.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
