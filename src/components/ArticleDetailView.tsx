@@ -32,7 +32,13 @@ import {
 import { auth, signInWithPopup, googleProvider } from '../firebase/config.ts';
 import ImageStudioModal from './ImageStudioModal.tsx';
 import WhatsAppShareModal, { WhatsAppIcon } from './WhatsAppShareModal.tsx';
-import { updateArticleOpenGraphMeta, openWhatsAppShare } from '../utils/shareUtils.ts';
+import { 
+  updateArticleOpenGraphMeta, 
+  openWhatsAppShare, 
+  getArticleUrl, 
+  copyArticleLinkToClipboard 
+} from '../utils/shareUtils.ts';
+
 
 interface ArticleDetailViewProps {
   post: NewsPost;
@@ -154,13 +160,14 @@ export default function ArticleDetailView({ post, onBack, onDeleted }: ArticleDe
     }
   };
 
-  const handleShare = () => {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(window.location.href);
+  const handleShare = async () => {
+    const success = await copyArticleLinkToClipboard(currentPost);
+    if (success) {
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2500);
     }
   };
+
 
   const toggleSpeech = () => {
     if (!('speechSynthesis' in window)) return;

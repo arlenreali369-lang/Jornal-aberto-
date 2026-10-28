@@ -89,20 +89,34 @@ export default function App() {
   // Modals
   const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
 
-  // URL Deep-Linking: Open article from ?materia=<id> or ?artigo=<id>
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
+  // Helper to extract materia ID from URL query (?materia=, ?artigo=) or path (/materia/:id, /noticia/:id)
+  const getMateriaIdFromLocation = (): string | null => {
+    if (typeof window === 'undefined') return null;
     const params = new URLSearchParams(window.location.search);
-    const materiaId = params.get('materia') || params.get('artigo');
-    if (materiaId) {
-      const found = posts.find((p) => p.id === materiaId);
-      if (found) {
-        setSelectedPost(found);
-      } else if (!isLoading) {
-        getNewsPostById(materiaId).then((p) => {
-          if (p) setSelectedPost(p);
-        });
-      }
+    const qId = params.get('materia') || params.get('artigo');
+    if (qId && qId.trim()) return qId.trim();
+
+    const pathname = window.location.pathname;
+    const match = pathname.match(/^\/(?:materia|noticia|artigo)\/([a-zA-Z0-9_\-]+)/);
+    if (match && match[1]) return match[1].trim();
+
+    return null;
+  };
+
+  // URL Deep-Linking: Open article from ?materia=<id> or path
+  useEffect(() => {
+    const materiaId = getMateriaIdFromLocation();
+    if (!materiaId) return;
+
+    if (selectedPost && selectedPost.id === materiaId) return;
+
+    const found = posts.find((p) => p.id === materiaId);
+    if (found) {
+      setSelectedPost(found);
+    } else if (!isLoading) {
+      getNewsPostById(materiaId).then((p) => {
+        if (p) setSelectedPost(p);
+      });
     }
   }, [posts, isLoading]);
 
@@ -110,8 +124,7 @@ export default function App() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const handlePopState = () => {
-      const params = new URLSearchParams(window.location.search);
-      const materiaId = params.get('materia') || params.get('artigo');
+      const materiaId = getMateriaIdFromLocation();
       if (!materiaId) {
         setSelectedPost(null);
       } else {
@@ -134,26 +147,23 @@ export default function App() {
   const handleOpenPost = (post: NewsPost) => {
     setSelectedPost(post);
     try {
-      const url = new URL(window.location.href);
-      url.searchParams.set('materia', post.id);
-      window.history.pushState({ materiaId: post.id }, '', url.toString());
+      const cleanUrl = `/?materia=${encodeURIComponent(post.id.trim())}`;
+      window.history.pushState({ materiaId: post.id }, '', cleanUrl);
     } catch (e) {
       console.warn('URL pushState notice:', e);
     }
   };
 
-  // Back to feed and clean URL query param
+  // Back to feed and clean URL
   const handleBackToFeed = () => {
     setSelectedPost(null);
     try {
-      const url = new URL(window.location.href);
-      url.searchParams.delete('materia');
-      url.searchParams.delete('artigo');
-      window.history.pushState({}, '', url.pathname + (url.search ? url.search : ''));
+      window.history.pushState({}, '', '/');
     } catch (e) {
       console.warn('URL replace notice:', e);
     }
   };
+
 
   // Auth listener
   useEffect(() => {

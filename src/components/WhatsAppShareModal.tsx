@@ -17,8 +17,10 @@ import {
   getArticleUrl, 
   getArticleImageUrl,
   copyShareTextToClipboard,
+  copyArticleLinkToClipboard,
   shareNative
 } from '../utils/shareUtils.ts';
+
 
 
 interface WhatsAppShareModalProps {
@@ -61,13 +63,14 @@ export default function WhatsAppShareModal({ post, isOpen, onClose }: WhatsAppSh
     }
   };
 
-  const handleCopyLinkOnly = () => {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(articleUrl);
+  const handleCopyLinkOnly = async () => {
+    const ok = await copyArticleLinkToClipboard(post);
+    if (ok) {
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2500);
     }
   };
+
 
   const handleNativeShare = async () => {
     const success = await shareNative(post);
@@ -165,7 +168,7 @@ export default function WhatsAppShareModal({ post, isOpen, onClose }: WhatsAppSh
                 {/* Rich Link Preview Box in WhatsApp */}
                 <div className="p-2.5 rounded-xl bg-white/70 dark:bg-black/30 border border-black/5 dark:border-white/10 text-[11px] space-y-1">
                   <span className="font-mono text-emerald-700 dark:text-emerald-300 font-bold block truncate">
-                    👉 jornalaberto.com.br/?materia={post.id.substring(0, 16)}...
+                    👉 {articleUrl}
                   </span>
                   <span className="text-stone-500 dark:text-stone-400 text-[10px] block">
                     Toque para ler a íntegra, ver fotos e comentar
@@ -183,14 +186,17 @@ export default function WhatsAppShareModal({ post, isOpen, onClose }: WhatsAppSh
           {/* Quick Actions */}
           <div className="space-y-2.5">
             {/* 1. Main Action: Direct WhatsApp Launch */}
-            <button
-              onClick={handleOpenWhatsApp}
-              className="w-full py-3.5 px-5 rounded-2xl bg-[#25D366] hover:bg-[#20bd5a] active:scale-[0.99] text-stone-950 font-black text-sm flex items-center justify-center gap-2.5 shadow-lg shadow-[#25D366]/30 transition-all cursor-pointer"
+            <a
+              href={getWhatsAppShareUrl(post)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full py-3.5 px-5 rounded-2xl bg-[#25D366] hover:bg-[#20bd5a] active:scale-[0.99] text-stone-950 font-black text-sm flex items-center justify-center gap-2.5 shadow-lg shadow-[#25D366]/30 transition-all cursor-pointer no-underline text-center"
             >
               <WhatsAppIcon className="w-5 h-5 text-stone-950" />
               <span>Abrir e Enviar no WhatsApp Agora</span>
               <ExternalLink className="w-4 h-4 ml-1 opacity-75" />
-            </button>
+            </a>
+
 
             {/* 2. Secondary Actions Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">

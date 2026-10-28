@@ -1,50 +1,71 @@
 import { NewsPost } from '../types/news.ts';
 
+const PUBLIC_FALLBACK_URL = 'https://ais-pre-ybfuuxyqh56ztqekqemt3w-462521878786.us-east1.run.app';
+
 /**
- * Returns canonical link for a specific news post
+ * Returns canonical, publicly accessible link for a specific news post.
+ * Always resolves to the public shared URL (ais-pre-) so anyone clicking on WhatsApp can read it.
  */
 export function getArticleUrl(postId: string): string {
-  if (typeof window === 'undefined') return '';
-  const origin = window.location.origin;
-  const pathname = window.location.pathname;
-  return `${origin}${pathname}?materia=${encodeURIComponent(postId)}`;
+  if (typeof window === 'undefined') {
+    return `${PUBLIC_FALLBACK_URL}/?materia=${encodeURIComponent(postId.trim())}`;
+  }
+
+  let origin = window.location.origin;
+
+  // Convert private development container URL to the public shared URL
+  if (origin.includes('ais-dev-')) {
+    origin = origin.replace('ais-dev-', 'ais-pre-');
+  } else if (!origin || origin.includes('localhost') || origin.includes('127.0.0.1')) {
+    origin = PUBLIC_FALLBACK_URL;
+  }
+
+  const cleanId = encodeURIComponent(postId.trim());
+  return `${origin}/?materia=${cleanId}`;
 }
 
 /**
- * Returns the exact public image URL for a post
- * Converts base64/data URIs to the server endpoint so WhatsApp crawler can load it
+ * Returns the exact public image URL for an article.
+ * If stored as base64 data URI, converts to the public server image endpoint.
  */
 export function getArticleImageUrl(post: NewsPost): string {
+  const defaultImage = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?q=80&w=1200&auto=format&fit=crop';
+  
   if (!post.coverImage) {
-    return 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?q=80&w=1200&auto=format&fit=crop';
+    return defaultImage;
   }
+
   if (post.coverImage.startsWith('http://') || post.coverImage.startsWith('https://')) {
     return post.coverImage;
   }
-  if (typeof window !== 'undefined') {
-    return `${window.location.origin}/api/materia-image/${encodeURIComponent(post.id)}`;
+
+  let origin = typeof window !== 'undefined' ? window.location.origin : PUBLIC_FALLBACK_URL;
+  if (origin.includes('ais-dev-')) {
+    origin = origin.replace('ais-dev-', 'ais-pre-');
+  } else if (!origin || origin.includes('localhost') || origin.includes('127.0.0.1')) {
+    origin = PUBLIC_FALLBACK_URL;
   }
-  return post.coverImage;
+
+  return `${origin}/api/materia-image/${encodeURIComponent(post.id.trim())}`;
 }
 
 /**
- * Generates the formatted WhatsApp message text
+ * Generates the clean WhatsApp message text.
  * Contains:
- * - Bold headline (Enunciado da matéria)
+ * - Bold headline (Enunciado da matéria) with category
  * - Subtitle / lead
- * - Cover image link so recipients can view / download the real image
- * - Direct link to read on Jornal Aberto
+ * - Single direct article link
+ * (WhatsApp automatically scans this single link and generates the rich card with the article's real image and headline)
  */
 export function formatWhatsAppMessage(post: NewsPost): string {
   const articleUrl = getArticleUrl(post.id);
-  const imageUrl = getArticleImageUrl(post);
   const headline = post.title.trim();
   const subtitle = post.subtitle?.trim();
   const categoryTag = post.category && post.category !== 'Sociedade' ? `[${post.category.toUpperCase()}] ` : '';
 
   const parts: string[] = [];
 
-  // Enunciado / Headline with news emoji
+  // Enunciado / Headline
   parts.push(`📰 *${categoryTag}${headline}*`);
 
   // Linha fina / Subtítulo / Resumo
@@ -52,17 +73,11 @@ export function formatWhatsAppMessage(post: NewsPost): string {
     parts.push(`_${subtitle}_`);
   }
 
-  // Imagem da matéria (link direto da foto da capa)
-  if (imageUrl) {
-    parts.push(`📸 *Foto da matéria:*\n${imageUrl}`);
-  }
-
-  // Link para a matéria completa
-  parts.push(`👉 *Leia a reportagem completa no Jornal Aberto:*\n${articleUrl}`);
+  // Link único para a matéria completa
+  parts.push(`👉 *Leia a matéria completa e veja as imagens no Jornal Aberto:*\n${articleUrl}`);
 
   return parts.join('\n\n');
 }
-
 
 /**
  * Creates the WhatsApp URL for direct click-to-chat
@@ -73,20 +88,36 @@ export function getWhatsAppShareUrl(post: NewsPost): string {
 }
 
 /**
- * Opens WhatsApp directly in web or app
+ * Opens WhatsApp safely in a new tab without breaking the iframe
  */
 export function openWhatsAppShare(post: NewsPost): void {
   const url = getWhatsAppShareUrl(post);
-  // Using window.open with _blank or direct location
-  const opened = window.open(url, '_blank', 'noopener,noreferrer');
-  if (!opened || opened.closed || typeof opened.closed === 'undefined') {
-    window.location.href = url;
+  try {
+    const opened = window.open(url, '_blank', 'noopener,noreferrer');
+    if (!opened) {
+      // Fallback via anchor element to avoid iframe navigation block
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  } catch (err) {
+    console.warn('Fallback anchor for WhatsApp share:', err);
+    const a = document.createElement('a');
+    a.href = url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   }
 }
 
 /**
  * Attempts native Web Share API (especially on mobile devices)
- * Passing title, text, and direct url
  */
 export async function shareNative(post: NewsPost): Promise<boolean> {
   const articleUrl = getArticleUrl(post.id);
@@ -120,7 +151,6 @@ export async function copyShareTextToClipboard(post: NewsPost): Promise<boolean>
       await navigator.clipboard.writeText(text);
       return true;
     }
-    // Fallback for older browsers
     const textarea = document.createElement('textarea');
     textarea.value = text;
     textarea.style.position = 'fixed';
@@ -137,7 +167,32 @@ export async function copyShareTextToClipboard(post: NewsPost): Promise<boolean>
 }
 
 /**
- * Helper to update dynamic Open Graph tags in DOM
+ * Copies canonical link to clipboard
+ */
+export async function copyArticleLinkToClipboard(post: NewsPost): Promise<boolean> {
+  const url = getArticleUrl(post.id);
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(url);
+      return true;
+    }
+    const textarea = document.createElement('textarea');
+    textarea.value = url;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textarea);
+    return true;
+  } catch (err) {
+    console.error('Clipboard copy error:', err);
+    return false;
+  }
+}
+
+/**
+ * Updates dynamic Open Graph tags in DOM
  */
 export function updateArticleOpenGraphMeta(post: NewsPost | null): void {
   if (typeof document === 'undefined') return;
@@ -151,7 +206,6 @@ export function updateArticleOpenGraphMeta(post: NewsPost | null): void {
   const desc = post ? (post.subtitle || post.content.substring(0, 160)) : defaultDesc;
   const image = post ? getArticleImageUrl(post) : defaultImage;
   const url = post ? getArticleUrl(post.id) : defaultUrl;
-
 
   document.title = title;
 
